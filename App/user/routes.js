@@ -20,6 +20,6 @@ router.post("/reset-password", controller.resetPassword);
 
 router.patch("/update/:id", controller.updateUser);
 
-router.delete("/delete/:id", controller.deleteUser);
+router.delete("/user/:id", controller.deleteUser);
 
 module.exports = router;

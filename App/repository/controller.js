@@ -86,7 +86,7 @@ exports.getRepositories = async (req, res) => {
 
 // Get a single repository by ID
 exports.getRepositoryById = async (req, res) => {
-  const { repositoryId } = req.params;
+  const { id } = req.params;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -100,7 +100,7 @@ exports.getRepositoryById = async (req, res) => {
       return res.status(400).json({ message: "you are not authorized" });
     }
 
-    const repository = await Repository.findByPk(repositoryId, {
+    const repository = await Repository.findByPk(id, {
       include: Branch,
     });
 
@@ -117,7 +117,7 @@ exports.getRepositoryById = async (req, res) => {
 
 // Update a repository by ID
 exports.updateRepository = async (req, res) => {
-  const { repositoryId } = req.params;
+  const { id } = req.params;
   const { name, branchId } = req.body;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
@@ -132,7 +132,7 @@ exports.updateRepository = async (req, res) => {
       return res.status(400).json({ message: "you are not authorized" });
     }
 
-    const repository = await Repository.findByPk(repositoryId);
+    const repository = await Repository.findByPk(id);
 
     if (!repository) {
       return res.status(404).json({ message: "Repository not found" });
