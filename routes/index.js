@@ -7,4 +7,5 @@ module.exports = (app) => {
   app.use("/api", require("../App/store/routes"));
   app.use("/api", require("../App/category/routes"));
   app.use("/api", require("../App/product/routes"));
+  app.use("/api", require("../App/notification/routes"));
 };
