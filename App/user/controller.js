@@ -31,7 +31,6 @@ exports.createUser = async (req, res) => {
     branchId,
     repositoryId,
     permissions,
-    tenantId,
     is_client,
     is_client_assistant,
   } = req.body;
@@ -65,7 +64,7 @@ exports.createUser = async (req, res) => {
       branchId,
       repositoryId,
       account_type,
-      tenantId,
+      tenantId: admin.tenantId,
     });
 
     let permission = null;
@@ -78,13 +77,13 @@ exports.createUser = async (req, res) => {
     }
 
     if (is_client) {
-      await Client.create({ userId: user.id, tenantId });
+      await Client.create({ userId: user.id, tenantId: admin.tenantId });
     }
 
     if (is_client_assistant) {
       await ClientAssistant.create({
         userId: user.id,
-        tenantId,
+        tenantId: admin.tenantId,
         clientId: admintoken.client.id,
       });
     }
@@ -103,15 +102,8 @@ exports.createUser = async (req, res) => {
 };
 
 exports.createClientAssistant = async (req, res) => {
-  const {
-    name,
-    phone,
-    salary,
-    password,
-    manage_product,
-    manage_category,
-    tenantId,
-  } = req.body;
+  const { name, phone, salary, password, manage_product, manage_category } =
+    req.body;
 
   try {
     const clientToken = req.headers.authorization.split(" ")[1]; // get token from Authorization header
@@ -136,7 +128,7 @@ exports.createClientAssistant = async (req, res) => {
       image: req.file ? req.file.filename : null,
       password: hashedPassword,
       account_type: "client assistant",
-      tenantId,
+      tenantId: client.tenantId,
     });
 
     let permission = null;
@@ -149,7 +141,7 @@ exports.createClientAssistant = async (req, res) => {
 
     await ClientAssistant.create({
       userId: user.id,
-      tenantId,
+      tenantId: client.tenantId,
       clientId: client.client.id,
     });
 
