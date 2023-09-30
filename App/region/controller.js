@@ -63,12 +63,21 @@ exports.getRegions = async (req, res) => {
   const { size, page, government, city } = req.query;
 
   try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const user = await User.findOne({
+      where: { token },
+      attributes: { exclude: ["password"] }, // exclude password from response
+    });
+
     const limit = parseInt(size);
     const offset = (parseInt(page) - 1) * limit;
 
     let regions = null;
 
-    let filters = {};
+    let filters = {
+      tenantId: user.tenantId,
+    };
 
     if (government) {
       filters.government = government;
