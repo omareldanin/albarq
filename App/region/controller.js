@@ -5,7 +5,7 @@ const Region = require("./model");
 
 // Create a new region
 exports.createRegion = async (req, res) => {
-  const { name, government, userId, tenantId, branchId } = req.body;
+  const { name, government, userId, branchId } = req.body;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -22,7 +22,7 @@ exports.createRegion = async (req, res) => {
     const region = await Region.create({
       name,
       government,
-      tenantId,
+      tenantId: user.tenantId,
       branchId,
     });
 
