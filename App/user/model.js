@@ -50,7 +50,7 @@ const User = sequelize.define("user", {
       "موظف مخزن",
       "موظف مخزن",
     ],
-    allowNull: false,
+    allowNull: true,
   },
   phone: {
     type: Sequelize.STRING,
