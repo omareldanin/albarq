@@ -373,7 +373,7 @@ exports.getAllUsers = async (req, res, next) => {
     }
 
     if (req.query.role) {
-      filters.phone = req.query.role;
+      filters.role = req.query.role;
     }
 
     if (req.query.branchId) {
