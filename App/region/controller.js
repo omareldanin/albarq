@@ -2,7 +2,7 @@ const Branch = require("../branch/model");
 const DeliveryRegion = require("../deliveryRegion/model");
 const User = require("../user/model");
 const Region = require("./model");
-
+const Permission = require("../permission/model");
 // Create a new region
 exports.createRegion = async (req, res) => {
   const { name, government, userId, branchId } = req.body;
