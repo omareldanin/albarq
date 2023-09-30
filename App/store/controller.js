@@ -1,16 +1,15 @@
 const Store = require("./model");
 const User = require("../user/model");
 const Permission = require("../permission/model");
-
 // Create a new store
 exports.createStore = async (req, res) => {
-  const { name, notes, userId, tenantId } = req.body;
+  const { name, notes, userId, tenantId, branchId } = req.body;
   try {
     const admintoken = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
     const admin = await User.findOne({
       where: { token: admintoken },
-      include: [Permission, Client],
+      include: [Permission],
       attributes: { exclude: ["password"] }, // exclude password from response
     });
 
@@ -18,7 +17,13 @@ exports.createStore = async (req, res) => {
       return res.status(400).json({ message: "you are not authorized" });
     }
 
-    const store = await Store.create({ name, notes, userId, tenantId });
+    const store = await Store.create({
+      name,
+      notes,
+      userId,
+      tenantId,
+      branchId,
+    });
 
     return res.status(201).json({ success: true, store });
   } catch (error) {
@@ -36,7 +41,7 @@ exports.getStores = async (req, res) => {
 
     const admin = await User.findOne({
       where: { token: admintoken },
-      include: [Permission, Client],
+      include: [Permission],
       attributes: { exclude: ["password"] }, // exclude password from response
     });
 
@@ -97,7 +102,7 @@ exports.getStoreById = async (req, res) => {
 
     const admin = await User.findOne({
       where: { token: admintoken },
-      include: [Permission, Client],
+      include: [Permission],
       attributes: { exclude: ["password"] }, // exclude password from response
     });
 
@@ -129,7 +134,7 @@ exports.updateStore = async (req, res) => {
 
     const admin = await User.findOne({
       where: { token: admintoken },
-      include: [Permission, Client],
+      include: [Permission],
       attributes: { exclude: ["password"] }, // exclude password from response
     });
 
@@ -164,7 +169,7 @@ exports.deleteStore = async (req, res) => {
 
     const admin = await User.findOne({
       where: { token: admintoken },
-      include: [Permission, Client],
+      include: [Permission],
       attributes: { exclude: ["password"] }, // exclude password from response
     });
 
