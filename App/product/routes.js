@@ -12,7 +12,7 @@ router.patch("/product/:id", controller.updateProduct);
 
 router.delete("/product/:id", controller.deleteOne);
 
-router.delete("/color", controller.addColors);
+router.patch("/color", controller.addColors);
 
 router.delete("/color/:id", controller.deleteColor);
 
