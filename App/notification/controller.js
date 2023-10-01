@@ -1,6 +1,7 @@
 const Notification = require("./model");
 const admin = require("firebase-admin");
 const jwt = require("jsonwebtoken");
+const moment = require("moment");
 
 const { Op } = require("sequelize");
 // const serviceAccount = require("../talabatek-firebase.json");
@@ -95,16 +96,12 @@ exports.getUserNotification = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    // await Notification.update(
-    //   { seen: true },
-    //   {
-    //     where: {
-    //       userId: decodedToken.userId,
-    //     },
-    //   }
-    // );
+    const results = notifications.map((notification) => {
+      const timeAgo = moment(notification.createdAt).fromNow();
+      return { ...notification.toJSON(), timeAgo };
+    });
 
-    return res.status(200).json({ results: notifications });
+    return res.status(200).json({ results });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Invalid token" });
@@ -126,6 +123,7 @@ exports.makeAllSeen = async (req, res) => {
       {
         where: {
           userId: decodedToken.userId,
+          seen: false,
         },
       }
     );
