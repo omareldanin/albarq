@@ -97,7 +97,7 @@ exports.getUserNotification = async (req, res) => {
     });
 
     const results = notifications.map((notification) => {
-      const timeAgo = moment(notification.createdAt).fromNow();
+      const timeAgo = moment(notification.createdAt).locale("ar").fromNow();
       return { ...notification.toJSON(), timeAgo };
     });
 
