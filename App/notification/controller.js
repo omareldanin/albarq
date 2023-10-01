@@ -95,6 +95,32 @@ exports.getUserNotification = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
+    // await Notification.update(
+    //   { seen: true },
+    //   {
+    //     where: {
+    //       userId: decodedToken.userId,
+    //     },
+    //   }
+    // );
+
+    return res.status(200).json({ results: notifications });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Invalid token" });
+  }
+};
+
+exports.makeAllSeen = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const decodedToken = jwt.verify(token, "albarq334533?/sdsd/.987654rfw2");
+
+    if (!decodedToken.userId) {
+      return res.status(404).json({ message: "المستخدم غير موجود" });
+    }
+
     await Notification.update(
       { seen: true },
       {
@@ -104,7 +130,35 @@ exports.getUserNotification = async (req, res) => {
       }
     );
 
-    return res.status(200).json({ results: notifications });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Invalid token" });
+  }
+};
+
+exports.makeOneSeen = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
+
+    const decodedToken = jwt.verify(token, "albarq334533?/sdsd/.987654rfw2");
+
+    if (!decodedToken.userId) {
+      return res.status(404).json({ message: "المستخدم غير موجود" });
+    }
+
+    await Notification.update(
+      { seen: true },
+      {
+        where: {
+          userId: decodedToken.userId,
+          id,
+        },
+      }
+    );
+
+    return res.status(200).json({ success: true });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Invalid token" });
