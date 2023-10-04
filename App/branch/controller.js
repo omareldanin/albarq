@@ -6,7 +6,7 @@ const Permission = require("../permission/model");
 
 // Create a new branch
 exports.createBranch = async (req, res) => {
-  const { name, email, phone, tenantId } = req.body;
+  const { name, email, phone, government, tenantId } = req.body;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -25,6 +25,7 @@ exports.createBranch = async (req, res) => {
       email,
       phone,
       tenantId,
+      government,
     });
 
     return res.status(201).json({ success: true, branch });
@@ -129,7 +130,7 @@ exports.getBranchById = async (req, res) => {
 // Update a branch by ID
 exports.updateBranch = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone } = req.body;
+  const { name, email, phone, government } = req.body;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -152,6 +153,7 @@ exports.updateBranch = async (req, res) => {
     branch.name = name;
     branch.email = email;
     branch.phone = phone;
+    branch.government = government;
 
     await branch.save();
 

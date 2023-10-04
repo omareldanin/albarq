@@ -4,6 +4,8 @@ const sequelize = require("../../util/database");
 
 const Tenant = require("../tenant/model");
 
+const Government = require("../government/model");
+
 const Branch = sequelize.define("branch", {
   id: {
     type: Sequelize.INTEGER,
@@ -27,5 +29,8 @@ const Branch = sequelize.define("branch", {
 
 Tenant.hasMany(Branch);
 Branch.belongsTo(Tenant);
+
+Government.hasMany(Branch);
+Branch.belongsTo(Government);
 
 module.exports = Branch;

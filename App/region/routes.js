@@ -8,7 +8,7 @@ router.post("/assign-regions", controller.assignRegionsToDelivery);
 
 router.get("/region", controller.getRegions);
 
-router.get("/region/:id", controller.updateRegion);
+router.get("/region/:id", controller.getRegionById);
 
 router.patch("/region/:id", controller.updateRegion);
 

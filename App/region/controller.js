@@ -1,11 +1,11 @@
 const Branch = require("../branch/model");
-const DeliveryRegion = require("../deliveryRegion/model");
 const User = require("../user/model");
 const Region = require("./model");
 const Permission = require("../permission/model");
+const { Op } = require("sequelize");
 // Create a new region
 exports.createRegion = async (req, res) => {
-  const { name, government, userId, branchId } = req.body;
+  const { name, governmentId, deliveryId, branchId } = req.body;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
@@ -21,14 +21,11 @@ exports.createRegion = async (req, res) => {
 
     const region = await Region.create({
       name,
-      government,
+      governmentId,
       tenantId: user.tenantId,
       branchId,
+      deliveryId,
     });
-
-    if (userId) {
-      await DeliveryRegion.create({ regionId: region.id, userId });
-    }
 
     return res.status(201).json({ succuss: true, region });
   } catch (error) {
@@ -39,16 +36,16 @@ exports.createRegion = async (req, res) => {
 
 // Assign regions to delivery
 exports.assignRegionsToDelivery = async (req, res) => {
-  const { userId, regions } = req.body;
+  const { deliveryId, regions } = req.body;
 
   try {
-    await DeliveryRegion.bulkCreate(
-      regions.map((region) => {
-        return {
-          regionId: region.id,
-          userId,
-        };
-      })
+    await Region.update(
+      { deliveryId },
+      {
+        where: {
+          id: { [Op.in]: regions },
+        },
+      }
     );
 
     return res.status(201).message({ success: true });
@@ -60,7 +57,7 @@ exports.assignRegionsToDelivery = async (req, res) => {
 
 // Get all regions
 exports.getRegions = async (req, res) => {
-  const { size, page, government, city } = req.query;
+  const { size, page, governmentId, city, deliveryId } = req.query;
 
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
@@ -79,12 +76,16 @@ exports.getRegions = async (req, res) => {
       tenantId: user.tenantId,
     };
 
-    if (government) {
-      filters.government = government;
+    if (governmentId) {
+      filters.governmentId = governmentId;
     }
 
     if (city) {
       filters.city = city;
+    }
+
+    if (deliveryId) {
+      filters.deliveryId = deliveryId;
     }
 
     if (page) {
@@ -114,9 +115,9 @@ exports.getRegions = async (req, res) => {
 // Get a single region by ID
 exports.getRegionById = async (req, res) => {
   try {
-    const { regionId } = req.params;
+    const { id } = req.params;
 
-    const region = await Region.findByPk(regionId);
+    const region = await Region.findByPk(id);
 
     if (!region) {
       return res.status(404).json({ message: "Region not found" });
@@ -133,7 +134,7 @@ exports.getRegionById = async (req, res) => {
 exports.updateRegion = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, government, city } = req.body;
+    const { name, governmentId, city } = req.body;
 
     const region = await Region.findByPk(id);
 
@@ -142,7 +143,7 @@ exports.updateRegion = async (req, res) => {
     }
 
     region.name = name;
-    region.government = government;
+    region.governmentId = governmentId;
     region.city = city;
 
     await region.save();
