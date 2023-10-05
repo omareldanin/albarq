@@ -75,7 +75,7 @@ const generateReceipt = async (order) => {
     barcode,
   });
 
-  const options = { format: "A5" };
+  const options = { format: "A5", phantomPath: "/usr/local/bin/phantomjs" };
 
   pdf
     .create(html, options)
