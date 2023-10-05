@@ -30,6 +30,7 @@ exports.createGovernment = async (req, res) => {
 
 // Get all governments
 exports.getGovernments = async (req, res) => {
+  const { size, page } = req.query;
   try {
     const token = req.headers.authorization.split(" ")[1]; // get token from Authorization header
 
