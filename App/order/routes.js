@@ -8,6 +8,4 @@ router.get("/client-statistics", controller.getClientNumbers);
 
 router.get("/client-orders", controller.getClientOrders);
 
-router.get("/order-receipt/:id", controller.createReceipt);
-
 module.exports = router;

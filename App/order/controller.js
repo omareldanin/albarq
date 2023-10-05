@@ -6,7 +6,8 @@ const User = require("../user/model");
 const Order = require("./model");
 const Region = require("../region/model");
 const sequelize = require("sequelize");
-const { generateReceipt, deleteFile } = require("./helpers/receipt");
+const { generateReceipt } = require("./helpers/receipt");
+const OrderProduct = require("../orderProduct/model");
 
 const status = [
   "تم تسجيل الطلب",
@@ -40,12 +41,12 @@ exports.createOrderByClient = async (req, res) => {
 
     const ordersData = await Promise.all(
       orders.map(async (order) => {
-        let delivery_amount = 0;
+        let tenant_cost = 0;
 
-        if (order.government === "بغداد") {
-          delivery_amount = client.tenant.baghdad_price;
+        if (order.government_name === "بغداد") {
+          tenant_cost = client.tenant.baghdad_price;
         } else {
-          delivery_amount = client.tenant.governments_price;
+          tenant_cost = client.tenant.governments_price;
         }
 
         let branch = await Branch.findOne({
@@ -54,23 +55,42 @@ exports.createOrderByClient = async (req, res) => {
 
         return {
           ...order,
-          delivery_amount,
+          delivery_amount: client.tenant.delivery_price,
           tenantId: client.tenantId,
           clientId: client.client.id,
           branchId: branch ? branch.id : null,
+          address: `${order.government_name} - ${order.region_name} - ${order.address}`,
+          tenant_cost,
         };
       })
     );
 
     let results = await Order.bulkCreate(ordersData);
 
+    //add order product
+    let orderProducts = [];
+
+    orders.forEach((order, index) => {
+      order.products.forEach((product) => {
+        orderProducts.push({
+          ...product,
+          orderId: results[index].id,
+        });
+      });
+    });
+
+    const orderProductsRes = await OrderProduct.bulkCreate(orderProducts);
+    // generate receipt for each order
     results = await Promise.all(
       results.map(async (order) => {
-        const receiptPath = await generateReceipt(
-          order,
-          client.tenant,
-          req.host
-        );
+        const receiptPath = await generateReceipt({
+          ...order.toJSON(),
+          client_name: client.name,
+          client_phone: client.phone,
+          tenant: client.tenant.name,
+          tenantLogo: "http://13.53.127.165:3000/uploads/" + client.tenant.logo,
+          registration: client.tenant.registration,
+        });
 
         await Order.update(
           { receipt: "/storage/receipt" + receiptPath },
@@ -79,7 +99,7 @@ exports.createOrderByClient = async (req, res) => {
 
         return {
           ...order.toJSON(),
-          receipt: "/storage/receipt" + receiptPath,
+          receipt: "/storage/receipt/receipt" + order.id,
         };
       })
     );
@@ -167,47 +187,30 @@ exports.getClientOrders = async (req, res) => {
 
     let orders = null;
 
+    let filters = { clientId: client.client.id };
+
+    if (status) {
+      filters.status = status;
+    }
+
     if (page) {
       orders = await Order.findAll({
         limit,
         offset,
-        where: {
-          clientId: client.client.id,
-        },
+        where: filters,
       });
     } else {
       orders = await Order.findAll({
-        where: {
-          clientId: client.client.id,
-        },
+        where: filters,
       });
     }
 
-    const count = await Product.count({ where: { ...filters } }); // Get total number of products
+    const count = await Product.count({ where: filters }); // Get total number of products
     const numOfPages = Math.ceil(count / limit); // Calculate number of pages
 
     return res
       .status(200)
       .json({ count: count, pages: numOfPages, results: orders });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "server error" });
-  }
-};
-
-exports.createReceipt = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const order = await Order.findByPk(id);
-
-    // Generate the PDF receipt
-    const receiptPath = await generateReceipt(order);
-
-    // Return the download link to the client
-    res.json({
-      receiptLink: `http://${req.host}/storage/receipt/${receiptPath}`,
-    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "server error" });

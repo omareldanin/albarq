@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>order</title>
+    <style>
+      .logo {
+        width: 80px;
+        position: absolute;
+        top: 20px;
+        left: 25px;
+      }
+      table {
+        width: 100%;
+        margin-top: 15px;
+        border: 1px solid #ccc;
+      }
+      td,
+      th {
+        border: 1px solid #ccc;
+        padding: 5px 0;
+        text-align: center;
+        font-size: 13px;
+      }
+      th {
+        background-color: rgba(255, 255, 0, 0.26);
+      }
+      .watermark {
+        position: absolute;
+        top: 28%;
+        left: 8%;
+        font-size: 116px;
+        font-weight: bold;
+        color: gray;
+        opacity: 0.1;
+        
+      }
+      svg{
+        width: 110px;
+        height: 110px;
+        float: left;
+      }
+    </style>
+  </head>
+  <body style="direction: rtl">
+    <img
+      src="http://13.53.127.165:3000/uploads/1695999278640-e1bd27b0cab2c0b7df4f849dfd41fb59.jpeg"
+      class="logo"
+    />
+    <img src="{{barcode}}" style="position: absolute;top: 35px;right: 25px;"/>
+    <hr style="margin-top: 110px; opacity: 0.5" />
+    <table>
+      <thead>
+        <tr>
+          <th>اسم العميل</th>
+          <th>هاتف العميل</th>
+          <th>رقم الوصل</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{client_name}}</td>
+          <td>{{client_phone}}</td>
+          <td>{{id}}</td>
+          <td>{{date}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>اسم الزبون</th>
+          <th>هاتف الزبون</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{recipient_name}}</td>
+          <td>{{recipient_phone}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>العنوان</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{address}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 style="text-align: center; margin: 10px 0 0">تفاصيل الطلب</h4>
+    <table>
+      <thead></thead>
+      <tbody>
+        <tr>
+          <td style="width: 25%; background-color: rgba(255, 255, 0, 0.26)">الكمية</td>
+          <td style="width: 25%">{{quantity}}</td>
+          <td style="width: 25%; background-color: rgba(255, 255, 0, 0.26)">النوع</td>
+          <td style="width: 25%">{{type}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead></thead>
+      <tbody>
+        <tr>
+          <td style="width: 40%; background-color: rgba(255, 255, 0, 0.26) !important">
+            الملاحظات
+          </td>
+          <td style="width: 60%; word-wrap: break-word; padding: 20px 0">
+            {{notes}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      "
+    >
+      <h3 style="display: inline-block">المبلغ مع التوصيل</h3>
+      <p
+        style="
+          font-size: 20px;
+          font-weight: bold;
+          display: inline-block;
+          margin-right: 150px;
+        "
+      >
+        {{total}}
+      </p>
+    </div>
+    <p style="margin: 0 20px">توقيع العميل</p>
+    <hr style="opacity: 0.5" />
+    {{!-- <p style="transform: rotate(-45deg);" class="watermark">{{tenant}}</p> --}}
+    <div>{{{qr}}}</div>
+    <div style="display: inline-block; float:right">{{{registration}}}</div>
+  </body>
+</html>

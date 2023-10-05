@@ -88,6 +88,11 @@ const Order = sequelize.define("order", {
     allowNull: false,
     defaultValue: 0,
   },
+  tenant_cost: {
+    type: Sequelize.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0,
+  },
   delivery_amount: {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,

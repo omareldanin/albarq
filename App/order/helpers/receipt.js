@@ -1,34 +1,91 @@
-const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+const handlebars = require("handlebars");
+const pdf = require("html-pdf");
+const QRCode = require("qrcode");
+const jsbarcode = require("jsbarcode");
+const { Canvas } = require("canvas");
 
 // Function to generate the PDF receipt
-const generateReceipt = async (order, tenant, host) => {
-  const doc = new PDFDocument();
+const generateBarcode = async (orderId) => {
+  return new Promise((resolve, reject) => {
+    const canvas = new Canvas();
+    jsbarcode(canvas, orderId, {
+      lineColor: "#000",
+      width: 2,
+      height: 30,
+      displayValue: false,
+    });
+    canvas.toDataURL("image/png", (err, png) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(png);
+      }
+    });
+  });
+};
 
-  // Set the output path for the PDF
-  const outputPath = path.join("storage/receipt", `receipt${order.id}.pdf`);
-  const stream = fs.createWriteStream(outputPath);
+const generateReceipt = async (order) => {
+  const templatePath = path.join(__dirname, "receipt.hbs");
 
-  doc.pipe(stream);
+  const template = fs.readFileSync(templatePath, "utf8");
 
-  // Add content to the PDF
-  doc.image(`http://${host}:3000/uploads/${tenant.logo}`, 50, 50, {
-    width: 100,
-  }); // Add logo at position (50, 50) with width of 100
-  -p;
-  doc.fontSize(18).text("Order Receipt", { align: "center" });
-  doc.moveDown();
-  doc.fontSize(12).text(`Order ID: ${order.id}`);
-  doc.moveDown();
-  doc.fontSize(12).text(`Customer Name: ${order.recipient_name}`);
-  doc.moveDown();
-  doc.fontSize(12).text(`Total Amount: $${order.invoice_amount}`);
+  const compiledTemplate = handlebars.compile(template, {
+    allowProtoMethodsByDefault: true,
+    allowProtoPropertiesByDefault: true,
+  });
 
-  doc.end();
+  const date = new Date(order.createdAt);
 
-  // Return the output path of the generated PDF
-  return `receipt${order.id}.pdf`;
+  const qr = await QRCode.toString(
+    `${order.id}`,
+    {
+      errorCorrectionLevel: "H",
+      type: "svg",
+    },
+    function (err, data) {
+      if (err) throw err;
+      return data;
+    }
+  );
+
+  const barcode = await generateBarcode(order.id);
+
+  console.log(barcode);
+
+  const html = compiledTemplate({
+    logo: order.tenantLogo,
+    id: order.id,
+    recipient_name: order.recipient_name,
+    recipient_phone: order.recipient_phone,
+    client_name: order.client_name,
+    client_phone: order.client_phone,
+    date: date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    }),
+    address: `${order.address}`,
+    quantity: order.quantity ? order.quantity : "",
+    type: order.order_type ? order.order_type : "",
+    notes: order.details ? order.datails : "",
+    total: order.invoice_amount.toLocaleString("en-US"),
+    tenant: order.tenant,
+    registration: order.registration,
+    qr: qr,
+    barcode,
+  });
+
+  const options = { format: "A5" };
+
+  pdf
+    .create(html, options)
+    .toFile(`storage/receipt/receipt${order.id}.pdf`, (err, res) => {
+      if (err) return console.log(err);
+      console.log(res);
+      return res.filename;
+    });
 };
 
 module.exports = { generateReceipt };
