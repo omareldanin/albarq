@@ -52,8 +52,6 @@ const generateReceipt = async (order) => {
 
   const barcode = await generateBarcode(order.id);
 
-  console.log(barcode);
-
   const html = compiledTemplate({
     logo: order.tenantLogo,
     id: order.id,
@@ -83,7 +81,6 @@ const generateReceipt = async (order) => {
     .create(html, options)
     .toFile(`storage/receipt/receipt${order.id}.pdf`, (err, res) => {
       if (err) return console.log(err);
-      console.log(res);
       return res.filename;
     });
 };

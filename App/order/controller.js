@@ -93,7 +93,7 @@ exports.createOrderByClient = async (req, res) => {
         });
 
         await Order.update(
-          { receipt: "/storage/receipt" + receiptPath },
+          { receipt: "/storage/receipt" + order.id },
           { where: { id: order.id } }
         );
 
